@@ -33,7 +33,7 @@ jobs:
         run: npm run lint 2>&1 | tee lint.log
 
       - name: Vite build
-        run: v
+        run: vite build 2>&1 | tee build.log
 
       - name: Discord notification on success
         if: success()
