@@ -24,16 +24,16 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm install 2>&1 | tee install.log
 
       - name: TypeScript build (tsc -b)
-        run: tsc -b
+        run: tsc -b 2>&1 | tee tsc.log
 
       - name: Run lint
-        run: npm run lint
+        run: npm run lint 2>&1 | tee lint.log
 
       - name: Vite build
-        run: vite build
+        run: vite build 2>&1 | tee build.log
 
       - name: Discord notification on success
         if: success()
@@ -43,7 +43,7 @@ jobs:
             -d '{
               "embeds": [
                 {
-                  "title": "✅ Build Succeeded",
+                  "title": "✅ Build Succeeded — 잘했다!",
                   "color": 65280,
                   "fields": [
                     {
@@ -74,6 +74,8 @@ jobs:
       - name: Discord notification on failure
         if: failure()
         run: |
+          echo "🔍 실패 로그를 수집 중..."
+          ERROR_MESSAGE=$(tail -n 10 build.log || echo "No build log")
           curl -H "Content-Type: application/json" \
             -X POST \
             -d '{
@@ -96,6 +98,10 @@ jobs:
                       "name": "Commit",
                       "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
                       "inline": false
+                    },
+                    {
+                      "name": "Error Log (Last 10 lines)",
+                      "value": "'"${ERROR_MESSAGE}"'"
                     }
                   ],
                   "footer": {
