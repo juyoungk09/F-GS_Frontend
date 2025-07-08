@@ -1,0 +1,108 @@
+name: SolidJS CI with Discord Embed Notification
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: TypeScript build (tsc -b)
+        run: tsc -b
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Vite build
+        run: vite build
+
+      - name: Discord notification on success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+              "embeds": [
+                {
+                  "title": "✅ Build Succeeded",
+                  "color": 65280,
+                  "fields": [
+                    {
+                      "name": "Repository",
+                      "value": "${{ github.repository }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Commit",
+                      "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
+                      "inline": false
+                    }
+                  ],
+                  "footer": {
+                    "text": "GitHub Actions"
+                  },
+                  "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+                }
+              ]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Discord notification on failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+              "embeds": [
+                {
+                  "title": "❌ Build Failed",
+                  "color": 16711680,
+                  "fields": [
+                    {
+                      "name": "Repository",
+                      "value": "${{ github.repository }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Commit",
+                      "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
+                      "inline": false
+                    }
+                  ],
+                  "footer": {
+                    "text": "GitHub Actions"
+                  },
+                  "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+                }
+              ]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
