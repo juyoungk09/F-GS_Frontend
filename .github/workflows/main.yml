@@ -2,13 +2,9 @@ name: SolidJS CI with Discord Embed Notification
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
 
 jobs:
   check:
@@ -38,9 +34,23 @@ jobs:
       - name: Discord notification on success
         if: success()
         run: |
+          # 변수 설정 (push vs PR)
+          if [ "${{ github.event_name }}" = "push" ]; then
+            USERNAME="${{ github.event.head_commit.author.name }}"
+            AVATAR="${{ github.event.head_commit.author.avatar_url }}"
+            MESSAGE="${{ github.event.head_commit.message }}"
+          else
+            # pull_request
+            USERNAME="${{ github.event.pull_request.user.login }}"
+            AVATAR="${{ github.event.pull_request.user.avatar_url }}"
+            MESSAGE="${{ github.event.pull_request.title }}"
+          fi
+
           curl -H "Content-Type: application/json" \
             -X POST \
             -d '{
+              "username": "'"${USERNAME}"'",
+              "avatar_url": "'"${AVATAR}"'",
               "embeds": [
                 {
                   "title": "✅ Build Succeeded — 잘했다!",
@@ -60,6 +70,11 @@ jobs:
                       "name": "Commit",
                       "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
                       "inline": false
+                    },
+                    {
+                      "name": "Message",
+                      "value": "'"${MESSAGE}"'",
+                      "inline": false
                     }
                   ],
                   "footer": {
@@ -74,11 +89,24 @@ jobs:
       - name: Discord notification on failure
         if: failure()
         run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            USERNAME="${{ github.event.head_commit.author.name }}"
+            AVATAR="${{ github.event.head_commit.author.avatar_url }}"
+            MESSAGE="${{ github.event.head_commit.message }}"
+          else
+            USERNAME="${{ github.event.pull_request.user.login }}"
+            AVATAR="${{ github.event.pull_request.user.avatar_url }}"
+            MESSAGE="${{ github.event.pull_request.title }}"
+          fi
+
           echo "🔍 실패 로그를 수집 중..."
           ERROR_MESSAGE=$(tail -n 10 build.log || echo "No build log")
+
           curl -H "Content-Type: application/json" \
             -X POST \
             -d '{
+              "username": "'"${USERNAME}"'",
+              "avatar_url": "'"${AVATAR}"'",
               "embeds": [
                 {
                   "title": "❌ Build Failed",
@@ -97,6 +125,11 @@ jobs:
                     {
                       "name": "Commit",
                       "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
+                      "inline": false
+                    },
+                    {
+                      "name": "Message",
+                      "value": "'"${MESSAGE}"'",
                       "inline": false
                     },
                     {
