@@ -24,7 +24,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm installl 2>&1 | tee install.log
+        run: npm install 2>&1 | tee install.log
 
       - name: TypeScript build (tsc -b)
         run: tsc -b 2>&1 | tee tsc.log
@@ -33,7 +33,7 @@ jobs:
         run: npm run lint 2>&1 | tee lint.log
 
       - name: Vite build
-        run: vite build 2>&1 | tee build.log
+        run: v
 
       - name: Discord notification on success
         if: success()
