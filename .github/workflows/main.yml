@@ -1,0 +1,166 @@
+name: SolidJS CI with Discord Embed Notification
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install 2>&1 | tee install.log
+
+      - name: TypeScript build (tsc -b)
+        run: tsc -b 2>&1 | tee tsc.log
+
+      - name: Run lint
+        run: npm run lint 2>&1 | tee lint.log
+
+      - name: Vite build
+        run: vite build 2>&1 | tee build.log
+
+      - name: Discord notification on success
+        if: success()
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            USERNAME="${{ github.event.head_commit.author.name }}"
+            AVATAR="${{ github.event.head_commit.author.avatar_url }}"
+            MESSAGE="${{ github.event.head_commit.message }}"
+          else
+            USERNAME="${{ github.event.pull_request.user.login }}"
+            AVATAR="${{ github.event.pull_request.user.avatar_url }}"
+            MESSAGE="${{ github.event.pull_request.title }}"
+          fi
+
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+              "username": "'"${USERNAME}"'",
+              "avatar_url": "'"${AVATAR}"'",
+              "embeds": [
+                {
+                  "title": "✅ 빌드 성공 — 잘했다!",
+                  "color": 65280,
+                  "fields": [
+                    {
+                      "name": "작성자",
+                      "value": "'"${USERNAME}"'",
+                      "inline": true
+                    },
+                    {
+                      "name": "Repository",
+                      "value": "${{ github.repository }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Commit",
+                      "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
+                      "inline": false
+                    },
+                    {
+                      "name": "Message",
+                      "value": "'"${MESSAGE}"'",
+                      "inline": false
+                    }
+                  ],
+                  "footer": {
+                    "text": "GitHub Actions"
+                  },
+                  "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+                }
+              ]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Discord notification on failure
+        if: failure()
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            USERNAME="${{ github.event.head_commit.author.name }}"
+            AVATAR="${{ github.event.head_commit.author.avatar_url }}"
+            MESSAGE="${{ github.event.head_commit.message }}"
+          else
+            USERNAME="${{ github.event.pull_request.user.login }}"
+            AVATAR="${{ github.event.pull_request.user.avatar_url }}"
+            MESSAGE="${{ github.event.pull_request.title }}"
+          fi
+
+          echo "🔍 실패 로그를 수집 중..."
+          ERROR_MESSAGE=$(tail -n 10 build.log || echo "No build log")
+
+          SPECIAL_MSG="이걸 못해? 특검이다"
+
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{
+              "username": "'"${USERNAME}"'",
+              "avatar_url": "'"${AVATAR}"'",
+              "embeds": [
+                {
+                  "title": "❌ 빌드 실패 - 특검 발동",
+                  "color": 16711680,
+                  "fields": [
+                    {
+                      "name": "작성자",
+                      "value": "'"${USERNAME}"'",
+                      "inline": true
+                    },
+                    {
+                      "name": "Repository",
+                      "value": "${{ github.repository }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Branch",
+                      "value": "${{ github.ref_name }}",
+                      "inline": true
+                    },
+                    {
+                      "name": "Commit",
+                      "value": "[View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
+                      "inline": false
+                    },
+                    {
+                      "name": "Message",
+                      "value": "'"${MESSAGE}"'",
+                      "inline": false
+                    },
+                    {
+                      "name": "Error Log (Last 10 lines)",
+                      "value": "'"${ERROR_MESSAGE}"'"
+                    },
+                    {
+                      "name": "Special Message",
+                      "value": "'"${SPECIAL_MSG}"'",
+                      "inline": false
+                    }
+                  ],
+                  "footer": {
+                    "text": "GitHub Actions"
+                  },
+                  "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+                }
+              ]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
