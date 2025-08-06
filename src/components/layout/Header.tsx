@@ -58,13 +58,13 @@ export default function Header() {
               fallback={
                 <>
                   <A 
-                    href="/login" 
+                    href="/user/login" 
                     class="px-4 py-2 text-sm rounded-md text-white bg-primary_color_3 hover:bg-primary_color_2 transition-colors"
                   >
                     로그인
                   </A>
                   <A 
-                    href="/signup" 
+                    href="/user/signup" 
                     class="px-4 py-2 text-sm rounded-md text-primary_color_4 bg-white hover:bg-gray-100 transition-colors"
                   >
                     회원가입
