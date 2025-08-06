@@ -1,6 +1,5 @@
 import { A, useLocation } from "@solidjs/router";
 import { Show } from "solid-js";
-import logo from "/logo.svg";
 export default function Header() {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
@@ -14,7 +13,7 @@ export default function Header() {
         <div class="flex items-center justify-between h-16">
           <div class="flex-shrink-0 flex items-center">
             <A href="/" class="text-2xl font-bold flex items-center text-white hover:text-primary_color_2 transition-colors">
-              <img src={logo} class="w-8 h-8" alt="logo" />
+              <img src="logo.svg" class="w-8 h-8" alt="logo" />
               <span class="ml-2">F&GS</span>
             </A>
           </div>
