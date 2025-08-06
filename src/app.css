@@ -1,4 +1,6 @@
+@import url('https://fastly.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.1/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css');
 @import "tailwindcss";
+
 
 :root {
   --background-rgb: 214, 219, 220;
@@ -11,7 +13,7 @@
     --foreground-rgb: 255, 255, 255;
   }
 }
-@import url('https://fastly.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.1/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css');
+
 body {
   font-family: 'Wanted Sans', sans-serif;
   background: rgb(var(--background-rgb));
