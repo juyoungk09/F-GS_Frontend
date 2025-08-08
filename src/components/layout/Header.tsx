@@ -13,7 +13,7 @@ export default function Header() {
         <div class="flex items-center justify-between h-16">
           <div class="flex-shrink-0 flex items-center">
             <A href="/" class="text-2xl font-bold flex items-center text-white hover:text-primary_color_2 transition-colors">
-              <img src="logo.svg" class="w-8 h-8" alt="logo" />
+              <img src="../../../public/logo.svg" class="w-8 h-8" alt="logo" />
               <span class="ml-2">F&GS</span>
             </A>
           </div>
@@ -57,13 +57,13 @@ export default function Header() {
               fallback={
                 <>
                   <A 
-                    href="/login" 
+                    href="/user/login" 
                     class="px-4 py-2 text-sm rounded-md text-white bg-primary_color_3 hover:bg-primary_color_2 transition-colors"
                   >
                     로그인
                   </A>
                   <A 
-                    href="/signup" 
+                    href="/user/signup" 
                     class="px-4 py-2 text-sm rounded-md text-primary_color_4 bg-white hover:bg-gray-100 transition-colors"
                   >
                     회원가입
