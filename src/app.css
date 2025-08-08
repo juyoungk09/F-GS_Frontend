@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-*{
-box-sizing: border-box;
-} 
-  
 :root {
   --background-rgb: 214, 219, 220;
   --foreground-rgb: 0, 0, 0;
@@ -25,9 +21,6 @@ body {
 @layer components {
     .btn {
         @apply px-4 py-2 rounded-full text-white bg-blue-500 hover:bg-blue-600;
-    }
-    .inputbox {
-      @apply p-2 bg-[#2F2F2F] border-[#585858] border-2 rounded-md w-70 h-8
     }
 }
 @layer utilities {
