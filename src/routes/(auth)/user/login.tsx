@@ -6,7 +6,7 @@ const Login = () => {
     const [passwordInput,setPasswordInput] = createSignal('');
     const navigate = useNavigate();
     const handleLogin= () => {
-        setEmailInput('');
+        setEmailInput(''); 
         setPasswordInput('');
         navigate("/")
     }
@@ -17,7 +17,7 @@ const Login = () => {
                     <img src={logo} class="w-8 h-8" alt="logo" />
                     <span class="ml-2">F&GS</span>
                 </A>
-            </div>
+            </div> 
             <div class="w-full h-full flex justify-center">
                 <div class="bg-[#1F1F1F] w-5/11 h-5/7 flex flex-col justify-center items-center gap-4 stroke-[#686868] rounded-xl border-[#686868] border-1">
                     <div class="flex flex-col gap-10">
