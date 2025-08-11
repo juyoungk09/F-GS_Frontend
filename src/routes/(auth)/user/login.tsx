@@ -33,7 +33,7 @@ const Login = () => {
                     <img src={logo} class="w-8 h-8" alt="logo"/>
                     <span class="ml-2">F&GS</span>
                 </A>
-            </div>
+            </div> 
             <div class="w-full h-full flex justify-center">
                 <div class="bg-[#1F1F1F] px-50 h-6/7 flex flex-col gap-10 items-center stroke-[#686868] rounded-xl border-[#686868] border-1">
                     <div class="font-bold text-4xl mt-auto">F-GS에 로그인하기</div>
