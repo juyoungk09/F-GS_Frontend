@@ -19,7 +19,7 @@ const Signup = () => {
     const InputBox = (props) => {
         return (
         <div class="flex flex-col gap-1">
-            <div class="font-wanted-sans font-medium text-good_gray">{props.element}</div>
+            <div class="font-medium text-good_gray">{props.element}</div>
             <input class="inputbox" type="text"
             value={props.inputVal} onInput={(e) => props.setinputVal(props.feild,e.currentTarget.value)}></input>
             {!props.isEntered && (<div class="font-medium text-red-700 text-xs leading-6">{props.element}{props.failmessage}</div>)}

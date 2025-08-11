@@ -3,7 +3,6 @@ import Header from "~/components/layout/Header";
 import Footer from "~/components/layout/Footer";
 import Sidebar from "~/components/layout/Sidebar";
 
-
 export default function Layout(props: RouteSectionProps) {
   return (
     <div class="bg-gray-100 flex flex-col min-h-screen">
