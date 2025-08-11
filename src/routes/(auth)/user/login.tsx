@@ -2,9 +2,9 @@ import { A, useHref, useNavigate } from "@solidjs/router";
 import logo from "/logo.svg"
 import { createSignal } from "solid-js";
 const Login = () => {
+    const navigate = useNavigate()
     const [emailInput,setEmailInput] = createSignal('');
     const [passwordInput,setPasswordInput] = createSignal('');
-    const navigate = useNavigate();
     const handleLogin= () => {
         setEmailInput(''); 
         setPasswordInput('');
@@ -31,7 +31,9 @@ const Login = () => {
                             <input class="p-2 bg-[#2F2F2F] border-[#585858] border-2 rounded-md w-70 h-8" type="text"
                             value={passwordInput()} oninput={(e) => setPasswordInput(e.currentTarget.value)}></input>
                         </div>
-                        <button class="bg-primary_color_3 w-70 h-8 rounded-md" onclick={handleLogin}>로그인</button>
+                        <button class="bg-primary_color_3 w-70 h-8 rounded-md
+                        hover:bg-primary_color_2/100 hover:text-[#111327]/50 transition-colors"
+                        onclick={handleLogin}>로그인</button>
                     </div>
                     <div class="flex gap-1">
                         <span class="font-wanted-sans font-medium">계정이 필요한가요?</span>
