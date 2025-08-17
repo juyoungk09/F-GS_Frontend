@@ -8,7 +8,7 @@ type NewQuestion = {
   required: boolean;
 };
 
-const BASE = 'https://1a4df77629fb.ngrok-free.app';
+const BASE = 'https://fg.sunrin.kr';
 
 async function readErr(r: Response) {
   try {

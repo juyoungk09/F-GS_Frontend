@@ -2,12 +2,13 @@ import { A, useHref, useNavigate } from "@solidjs/router";
 import logo from "/logo.svg"
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
+import axios from "axios";
 const Login = () => {
     const InputBox = (props) => {
         return (
         <div class="flex flex-col gap-1">
             <div class="font-wanted-sans font-medium text-good_gray">{props.element}</div>
-            <input class="inputbox" type="text"
+            <input class="inputbox" type={props.element === "비밀번호" ? "password" : "text"} spellcheck="false"
             value={props.inputVal} onInput={(e) => props.setinputVal(props.feild,e.currentTarget.value)}></input>
             {!props.isEntered && (<div class="font-medium text-red-700 text-xs leading-6">{props.element}{props.failmessage}</div>)}
         </div>
@@ -21,10 +22,27 @@ const Login = () => {
     })
     const navigate = useNavigate()
     const handleLogin = () => {
+        const url = "https://fg.sunrin.kr"
         setForm("emailEntered",form.emailInput.trim() !== "")
         setForm("passwordEntered",form.passwordInput.trim() !== "")
-        if (form.emailEntered == true && form.passwordEntered == true)
-            navigate("/");
+        if (form.emailEntered == true && form.passwordEntered == true){
+            console.log(form.emailInput,form.passwordInput)
+            const user = {
+                email :form.emailInput,
+                password :form.passwordInput
+            }
+            axios.post(`${url}/api/users/login`, user, {
+                withCredentials: true,
+                headers: { "Content-Type": "application/json" }
+                })
+            .then(res => {
+                console.log("로그인 성공!",res)
+                navigate("/");
+            })
+            .catch(err => {
+                alert("로그인 실패. 다시 시도해보세요")
+                console.log("에러",err)})
+        }
     }
     return (
         <main class="bg-primary_color_4 w-screen h-screen text-white flex flex-col gap-10">
