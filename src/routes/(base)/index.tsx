@@ -47,7 +47,7 @@ function fetchPosts(): Promise<Post[]> {
 export default function Home() {
   const [posts] = createResource<Post[]>(fetchPosts);
   const [PopularTags] = createResource<Tag[]>(async () => {
-    const response = await fetch("http://fg.sunrin.kr/api/posts/tags/top10");
+    const response = await fetch("https://fg.sunrin.kr/api/posts/tags/top10");
     return (await response.json()) as Tag[];
   });
   return (

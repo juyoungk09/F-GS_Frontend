@@ -11,6 +11,7 @@
     "@solidjs/start": "^1.1.0",
     "axios": "^1.11.0",
     "bootstrap-icons": "^1.13.1",
+    "socket.io-client": "^4.8.1",
     "solid-js": "^1.9.5",
     "vinxi": "^0.5.7"
   },

@@ -1,10 +1,14 @@
-import { A, useLocation } from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
+import axios from "axios";
 import { createSignal, Show } from "solid-js";
 export default function Header({hamberger, setHamberger}: {hamberger: () => boolean, setHamberger: (hamberger: boolean) => void}) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
   const isLoggedIn = true;
   const user = { name: "사용자" };
+  // const user = axios.get
+  const navigate = useNavigate()
+
 
   return (
     <header class="bg-primary_color_4 whitespace-pre-wrap overflow-wrap break-words sticky top-0 flex justify-center shadow-md w-full z-100">
@@ -52,9 +56,9 @@ export default function Header({hamberger, setHamberger}: {hamberger: () => bool
                 <span class="text-sm text-white">{user.name}님</span>
                 <button class="p-1 rounded-full text-gray-200 hover:text-white focus:outline-none">
                   <span class="sr-only">프로필 메뉴</span>
-                  <div class="h-8 w-8 rounded-full bg-primary_color_2 flex items-center justify-center text-white">
+                  <A href="/user/me" class="h-8 w-8 rounded-full bg-primary_color_2 flex items-center justify-center text-white">
                     {user.name[0]}
-                  </div>
+                  </A>
                 </button>
               </div>
             </Show>
