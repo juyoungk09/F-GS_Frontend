@@ -1,4 +1,5 @@
 @import url('https://fastly.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.1/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css');
+@import url('https://fastly.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.1/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css');
 @import "tailwindcss";
 @import "bootstrap-icons/font/bootstrap-icons.css";
 #app {
@@ -16,6 +17,7 @@
     --foreground-rgb: 255, 255, 255;
   }
 }
+
 body {
   font-family: 'Wanted Sans', sans-serif;
   background: rgb(var(--background-rgb));
@@ -34,9 +36,6 @@ body {
     }
     .inputbox {
       @apply p-2 bg-[#2F2F2F] border-[#585858] border-2 rounded-md w-70 h-8
-    }
-    .tag {
-      @apply w-fit px-2 rounded-2xl bg-[#D1D1D1] border-1 border-[#BBBBBB]
     }
 }
 @layer utilities {
