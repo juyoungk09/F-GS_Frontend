@@ -8,7 +8,7 @@ type NewQuestion = {
   required: boolean;
 };
 
-const BASE = 'https://fg.sunrin.kr';
+const BASE = 'https://fg.sunrin.kr/api';
 
 async function readErr(r: Response) {
   try {
@@ -82,7 +82,6 @@ const [allTags] = createResource<Tag[]>(async () => {
   const [categoryText, setCategoryText] = createSignal('');
   const [content, setContent] = createSignal('');
 
-  const [selectedTagIds, setSelectedTagIds] = createSignal<number[]>([]);
   const [deadline, setDeadline] = createSignal('');
   const [maxRecruits, setMaxRecruits] = createSignal(1);
 
@@ -151,10 +150,6 @@ const [allTags] = createResource<Tag[]>(async () => {
       const post = await postRes.json();
       const pid = post.id;
 
-      const tagIds = selectedTagIds();
-      if (tagIds.length > 0) {
-        await api.setPostTags(pid, tagIds);
-      }
 
       const qsPayload: NewQuestion[] = questions.map((q) => ({
         label: q.label,
@@ -281,24 +276,7 @@ const [allTags] = createResource<Tag[]>(async () => {
                     태그
                   </button>
                   
-                  <Show when={selectedTags().length > 0}>
-                    <div class="mb-6">
-                        <h3 class="text-sm font-medium text-gray-500 mb-2">선택된 태그:</h3>
-                        <div class="flex flex-wrap gap-2">
-                            {selectedTags().map(tag => (
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
-                                    {tag.name}
-                                    <button 
-                                        onClick={() => toggleTag(tag)}
-                                        class="ml-1.5 text-blue-500 hover:text-blue-700"
-                                    >
-                                        ×
-                                    </button>
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                </Show>
+                  
 
                   <Show when={isDropdownOpen()}>
                         <div class="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
