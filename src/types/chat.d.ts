@@ -6,11 +6,11 @@ type ChatMessage = {
   createdAt: string;  
   isRead: boolean;
 };
-type SendMessageDto = {
+type SendMessage = {
   to: string;
   content: string;
 };
-type ChatListItemDto = {
+type ChatListItem = {
   userId: string;
   userName: string;
   profilePath: string;

@@ -1,21 +1,25 @@
 import { useParams } from "@solidjs/router";
-import { createMemo, createResource, createSignal, For, Show, createEffect } from "solid-js";
+import { createMemo, createResource, createSignal, For, Show, createEffect, onMount } from "solid-js";
 import { io } from "socket.io-client";
-
-
+import { user, setUser } from "~/stores/store";
+import Loading from "~/components/layout/Loading";
 
 const Chat = () => {
   const [messages, setMessages] = createSignal<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = createSignal('');
+  if (!user.id) return <Loading? />;
   const socket = io('http://localhost:3001/', {
-    query: {"userId" : useParams().user_id},
+    query: {"userId" : user.id.toString()},
   });  
+  onMount(() => {
+    socket.emit('join', user.id.toString());
+  });
   const fetchChat = async (userId: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
           id: userId,
-          name: userId === '1' ? '프로젝트 A 팀' : '개인 채팅방',
+          name: userId === user.id.toString() ? '프로젝트 A 팀' : '개인 채팅방',
           avatar: "https://randomuser.me/api/portraits/men/1.jpg"
         });
       }, 300);
@@ -27,12 +31,12 @@ const Chat = () => {
   });
   const params = useParams();
   const userId = createMemo(() => params.user_id);
-  const myId = createMemo(() => "1");
+  // const myId = createMemo(() => user.id);
   // const [chat, {refetch, mutate}] = createResource<string, ChatRoom>(userId(), fetchChat);
 
   const loadMessages = () => {
     const mockMessages: ChatMessage[] = [
-      { id: 1, from: 'other', to: 'me', message: '안녕하세요! 프로젝트는 잘 진행되고 있나요?', createdAt: '10:30', isRead: false },
+      { id: 1, from:   'other', to: 'me', message: '안녕하세요! 프로젝트는 잘 진행되고 있나요?', createdAt: '10:30', isRead: false },
       { id: 2, from: 'me', to: 'other', message: '네, 거의 다 완성되었어요!', createdAt: '10:32', isRead: false },
       { id: 3, from: 'me', to: 'other', message: '오늘 중으로 완성본 보내드릴게요~', createdAt: '10:32', isRead: false },
     ];
@@ -76,13 +80,11 @@ const Chat = () => {
   createEffect(() => {
     messages(); 
     if (chatRef) {
-      // 메시지 배열이 바뀔 때마다 아래로 스크롤해주는거
       chatRef.scrollTop = chatRef.scrollHeight;
     }
   });
   return (
     <div class="flex flex-col w-full h-[calc(100vh-64px)] overflow-y-auto bg-gray-50">
-      {/* 상단 이름 */}
       <header class="bg-white shadow-sm p-4 border-b border-gray-200">
         <div class="flex items-center space-x-3">
           <img 
@@ -97,9 +99,8 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* 메세지 창 */}
       <div ref={chatRef} class="flex-1 overflow-y-auto p-4 space-y-4">
-        <Show when={!chat.loading} fallback={<div class="text-center py-8 text-gray-500">로딩 중...</div>}>
+        <Show when={!chat.loading} fallback={<Loading />}>
           <For each={messages()}>
             {(message) => (
               <div class={`flex ${message.from === myId() ? 'justify-end' : 'justify-start'}`}>

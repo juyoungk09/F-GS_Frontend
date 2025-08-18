@@ -1,8 +1,11 @@
-import { A} from "@solidjs/router";
-import { For } from "solid-js";
+import { A } from "@solidjs/router";
+import { For, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-const PostItem = ({post}: {post: Post}) => {
+import HoverPostItem from "./HoverPostItem";
+
+const PostItem = ({post, isMoreShow, setIsMoreShow}: {post: Post, isMoreShow: () => number, setIsMoreShow: (show: number) => void}) => {
     const navigate = useNavigate();
+
     function formatRelativeTime(dateString: string): string {
       const date = new Date(dateString);
       const now = new Date();
@@ -23,14 +26,15 @@ const PostItem = ({post}: {post: Post}) => {
     } 
 
     return (
-        <A href={`/post/${post.id}`} class="bg-white aspect-square flex flex-col p-3 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-100 text-sm hover:border-primary_color_3/30">
+        <div class="relative">
+            <A href={`/post/${post.id}`} class="bg-white flex flex-col p-3 rounded-lg transition-all border border-gray-100 text-sm hover:border-primary_color_3/30">
                   <div class="flex-1 flex flex-col">
                     <div class="flex justify-between items-start gap-2 mb-2">
-                      <h3 class="font-semibold text-gray-900 line-clamp-2 text-sm leading-tight">
+                      <h3 class="font-semibold max-w-1/2 text-gray-900 line-clamp-1 text-md leading-tight">
                         {post.title}
                       </h3>
                       <div class="flex flex-col items-end gap-1">
-                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">
+                        <span class="text-[10px] w-1/2 truncate px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
                           {post.category} 
                         </span>
                         {post.is_finished && (
@@ -50,11 +54,8 @@ const PostItem = ({post}: {post: Post}) => {
                           />
                         )}
                         <span
-                          class="text-primary_color_2 hover:underline font-medium truncate text-xs"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(`/user/${post.author.id}`);
-                          }}
+                          class="text-primary_color_3 hover:underline font-medium truncate text-xs"
+                          onClick={(e) => {e.preventDefault(); navigate(`/user/${post.author.id}`);}}
                         >
                           {post.author.name}
                         </span>
@@ -69,25 +70,42 @@ const PostItem = ({post}: {post: Post}) => {
                         <span>마감: {new Date(post.deadline).toLocaleDateString('ko-KR').replace(/\./g, '.').replace(/\s/g, '')}</span>
                       </div>  
                       
-                      <div class="flex flex-wrap gap-1 mt-2">
-                       <For each={post.tags}>
-                        {(tag) => (
-                          <span 
-                            class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap overflow-hidden text-ellipsis"
-                            style={{ 'background-color': `${tag.bg_color}20`, color: tag.font_color, 'max-width': '100px' }}
-                            title={tag.name}
+                      <div class="flex flex-wrap gap-1 mt-2 max-h-16 overflow-y-auto">
+                        <For each={post.tags.slice(0, 3)}>
+                          {(tag) => (
+                            <div>
+                              <span 
+                                class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.7rem] font-medium whitespace-nowrap overflow-hidden text-ellipsis"
+                                style={{'background-color': `${tag.bg_color}`, 'color': tag.font_color}}
+                                title={tag.name}
                               >
-                            {tag.name}
-                          </span>
-                        )}
-                      </For> 
-                    </div> 
+                                {tag.name}
+                              </span>
+                            </div>
+                          )}
+                        </For>
+                      </div>
+                      {post.tags.length > 0 && (
+                        <div class="text-[0.7rem] text-gray-400 mt-1">
+                          {post.tags.length}개 태그
+                        </div>
+                      )} 
                     <div class="flex justify-between items-center mt-2 pt-1.5 border-t border-gray-100">
                       <p class="text-gray-400 text-[0.7rem]">{formatRelativeTime(post.created_at)}</p>
+                      <button class="text-primary_color_4 hover:underline"  onClick={(e) => {e.preventDefault(); setIsMoreShow(post.id);}}>
+                        <i class="bi bi-eye"></i> <span class="ml-1">내용 보기</span>
+                      </button>
                     </div>
+                  
                   </div>
                 </div>
-                </A>
+            </A>
+            <Show when={isMoreShow() === post.id}>
+              <div class="absolute z-50 w-full  top-0 right-0 bg-white rounded-lg shadow-lg border border-gray-200">
+                <HoverPostItem post={post} setIsMoreShow={setIsMoreShow} />
+              </div>
+            </Show>
+        </div>
     );
 }
 export default PostItem;

@@ -12,14 +12,18 @@ type Post = {
     id: number;
     title: string;
     content: string;
-    category: string;
+    category: string; 
     created_at: string;
     updated_at: string;
     deadline: string;
     is_finished: boolean;
     max_recruits: number;
     current_recruits: number;
-    author: User;
+    author: UserInform;
     tags: Tag[];
-    recruiters: User[];
+    recruiters: UserInform[];
+};
+type Category = {
+    id: number;
+    name: string;
 };
