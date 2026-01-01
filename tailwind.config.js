@@ -10,6 +10,7 @@ export default {
         primary_color_2: '#A9B5DF',
         primary_color_3: '#7886C7',
         primary_color_4: '#2D336B',
+        good_gray: "#FCFBFC"
       },
       fontSize: {
         'xs-custom': '0.65rem',

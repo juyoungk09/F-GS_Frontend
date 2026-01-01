@@ -1,7 +1,8 @@
-import { For, createSignal } from 'solid-js';
+import { For, createSignal, createResource } from 'solid-js';
 import ChatRoomItem from './ChatRoomItem';
-import { useParams } from '@solidjs/router';
-
+import { useParams, useNavigate } from '@solidjs/router';
+import { BASE_URL } from '~/stores/store';
+import axios from 'axios';
 const mockChatRooms: ChatListItem[] = [
   {
     userId: '1',
@@ -46,14 +47,25 @@ const mockChatRooms: ChatListItem[] = [
 ];
 
 const ChatRoomList = () => {
+    const navigate = useNavigate();
     const fetchPosts = () : Array<ChatListItem> => {return mockChatRooms};
-    const [rooms] = createSignal<Array<ChatListItem>>(fetchPosts());
+    // const [rooms] = createSignal<Array<ChatListItem>>(fetchPosts());
+    const [rooms] = createResource<Array<ChatListItem>>(async () => {
+        const response = await axios.get(`https://fg.sunrin.kr/ws/messages/list`, { withCredentials: true });
+        console.log( "Error",response.data)
+        if(response.data.length === 0){
+            navigate("/")
+        }
+        console.log("response.data",response.data)
+        return (await response.data) as ChatListItem[];
+    });
     const [searchQuery, setSearchQuery] = createSignal<string>('');
     const params = useParams(); 
+
     const [activeRoomId, setActiveRoomId] = createSignal<string | null>(params.user_id);
     const filteredRooms = () => { // 실시간 검색
       const query = searchQuery().toLowerCase();
-      return rooms().filter(room => 
+      return rooms()?.filter(room => 
         room.userName.toLowerCase().includes(query) || 
         room.lastMessage.toLowerCase().includes(query)
       );
@@ -73,7 +85,7 @@ const ChatRoomList = () => {
           </For>
       </div>
       <div class="p-4 border-t hidden sm:block border-gray-200">
-        <button class="w-full text-xs whitespace-pre-line overflow-wrap break-words bg-primary_color_3 hover:bg-primary_color_2 text-white py-2 px-4 rounded-lg transition-colors">
+        <button onClick={() => navigate('/chat/find')} class="w-full text-xs whitespace-pre-line overflow-wrap break-words bg-primary_color_3 hover:bg-primary_color_2 text-white py-2 px-4 rounded-lg transition-colors">
           새 채팅 시작하기
         </button>
       </div>

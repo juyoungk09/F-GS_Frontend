@@ -5,7 +5,7 @@ export default function UserItem({user}: {user: User}) {
 
   return (
     <A 
-      href={`/user/${user.name}`}
+      href={`/user/${user.id}`}
       class="block w-full hover:opacity-90 transition-opacity"
     >
           <div class="flex items-start p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">

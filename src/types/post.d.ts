@@ -1,4 +1,3 @@
-
 type Tag = {
     id: number;
     name: string;
@@ -10,6 +9,8 @@ type Tag = {
 
 type Post = {
     id: number;
+    apply : number;
+    attachments : string[];
     title: string;
     content: string;
     category: string; 

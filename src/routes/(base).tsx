@@ -8,50 +8,28 @@ import { Suspense } from "solid-js";
 import Loading from "~/components/layout/Loading";
 import { user, setUser } from "~/stores/store";
 import axios from "axios";
+import { BASE_URL } from "~/stores/store";
 export default function Layout(props: RouteSectionProps) { 
     const navigate = useNavigate();
     const location = useLocation();
     const [hamberger, setHamberger] = createSignal(false);
-    function getCookieClient(name: string): string | null {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()!.split(';').shift()!;
-      return null;
-    }
-    createEffect(async () => {
-      try {
-        console.log("1. 인증 시작");
-        const token = getCookieClient("access_token");
-        const allCookies = document.cookie;
-        console.log("2. 토큰:", token); 
-        console.log("3. 모든 쿠키:", allCookies); 
-        
-        if (token) {
-          console.log("4. 토큰 있음: 사용자 데이터 가져오기");
-          try {
-            const response = await axios.get("https://fg.sunrin.kr/api/users/private/me", { withCredentials: true });
+    createEffect(
+      async() => {
+         try {
+            const response = await axios.get(`${BASE_URL}/users/private/me`, { withCredentials: true });
             const userData = response.data;
             console.log("5. 사용자 데이터 받음:", userData);
             setUser(userData);
           } catch (error) {
             console.error("사용자 데이터 가져오기 오류:", error);
           }
-        } else {
-          console.log("6. 토큰 없음");
           const publicPaths = ["/", "/post/:id", "/search/post", "/search/user"];
           const isPublic = publicPaths.some(path => location.pathname.startsWith(path));
-          console.log("7. 공개 페이지 여부:", isPublic);
-          console.log("8. 현재 경로 pathname:", location.pathname);
             if (!isPublic) {
-            console.log("9. 로그인되지 않음 && 공개페이지가 아님");
             navigate("/login");
           }
         }
-      } catch (error) {
-        console.error("인증 오류:", error);
-      }
-      console.log("10. 인증 완료");
-    });
+    );
     
   return (
     <div class="flex box-border relative flex-row w-full h-full" >

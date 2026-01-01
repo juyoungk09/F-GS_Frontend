@@ -17,24 +17,27 @@ const Sidebar = ({ isShow, setHamberger }: { isShow: () => boolean, setHamberger
   return (
     <div 
       class={`fixed top-0 left-0 h-full w-64 bg-primary_color_4 bg-opacity-100
-        transition-transform duration-200 ease-in-out z-150
+        transition-transform duration-200 ease-in-out z-150 group-hover:scroll-auto
         ${isShow() ? "translate-x-0" : "-translate-x-full"}`}
     >
       <div class="h-full w-full flex flex-col  p-4 pt-16 items-start justify-start overflow-y-auto">   
-        <h2> 빠른 링크</h2>
+        <h1 class="text-lg font-semibold mb-2">빠른 링크</h1>
         <nav class="space-y-2 border-gray-200 mb-4 w-full">
-          <NavItem href="/" isActive={isActive("/")} icon="house">
+          <A href="/" class={`flex items-center px-4 py-2 rounded-md text-base gap-2 font-medium transition-colors ${isActive("/") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"}`}>
             홈
-          </NavItem>
-          <NavItem href="/search/post" isActive={isActive("/search/post")} icon="search">
+          </A>
+          <A href="/search/post" class={`flex items-center px-4 py-2 rounded-md text-base gap-2 font-medium transition-colors ${isActive("/search/post") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"}`}>
             검색
-          </NavItem>
-          <NavItem href="/post/new" isActive={isActive("/post/new")} icon="plus">
+          </A>
+          <A href="/post/new" class={`flex items-center px-4 py-2 rounded-md text-base gap-2 font-medium transition-colors ${isActive("/post/new") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"}`}>
             게시
-          </NavItem>
-          <NavItem href="/chat" isActive={isActive("/chat")} icon="chat-dots">
+          </A>
+          <A href="/chat" class={`flex items-center px-4 py-2 rounded-md text-base gap-2 font-medium transition-colors ${isActive("/chat") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"}`}>
             채팅
-          </NavItem>
+          </A>
+          <A href="/user/me" class={`flex items-center px-4 py-2 rounded-md text-base gap-2 font-medium transition-colors ${isActive("/user/me") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"}`}>
+            내 정보
+          </A>
         </nav>
         <Show when={myPosts()}>
           <h2 class="text-lg font-semibold mb-2">내가 쓴 게시글</h2>
@@ -54,16 +57,5 @@ const Sidebar = ({ isShow, setHamberger }: { isShow: () => boolean, setHamberger
     </div>
   );
 };
-
-const NavItem = ({ href, isActive, children, icon }: { href: string; isActive: boolean; children: string; icon: string; }) => (
-  <A href={href} class={`flex items-center px-4 py-2 rounded-md text-base gap-2 font-medium transition-colors ${
-    isActive 
-      ? `bg-primary_color_3 text-white` 
-      : `text-gray-200 hover:bg-primary_color_3/50 hover:text-white`
-    }`}>
-    <i class={`bi bi-${icon}`}></i>
-    {children}
-  </A>
-);
 
 export default Sidebar;

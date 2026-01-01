@@ -18,8 +18,8 @@ const Footer = () => {
             <h4 class="text-lg font-semibold mb-4">빠른 링크</h4>
             <ul class="space-y-2">
               <li><A href="/" class="text-gray-300 hover:text-white transition-colors">홈</A></li>
-              <li><A href="/post" class="text-gray-300 hover:text-white transition-colors">게시판</A></li>
-              <li><A href="/notification" class="text-gray-300 hover:text-white transition-colors">공지사항</A></li>
+              <li><A href="/search/post" class="text-gray-300 hover:text-white transition-colors">게시판</A></li>
+              <li><A href="/search/user" class="text-gray-300 hover:text-white transition-colors">공지사항</A></li>
             </ul>
           </div>
 

@@ -1,6 +1,7 @@
-import { createResource, createSignal, Show } from "solid-js";
+import { createResource, createSignal, For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import { BASE_URL } from "~/stores/store";
+import PostItem from "~/components/features/search/PostItem";
 const SearchPost = () => {
     const [allTags] = createResource<Tag[]>(async () => {
       const response = await fetch(`${BASE_URL}/posts/tags`);
@@ -10,17 +11,16 @@ const SearchPost = () => {
       const response = await fetch(`${BASE_URL}/posts/festivals`);
       return (await response.json()) as Category[];
     });
-    const [allPosts] = createResource<Post[]>(async () => {
-      const response = await fetch(`${BASE_URL}/search/post?category=${selectedCategories().join(",")}&tags=${selectedTags().join(",")}`);
-      return (await response.json()) as Post[];
-    });
+    const [allPosts, setAllPosts] = createSignal<Post[]>([]);
     let dropdownRef: HTMLElement | undefined;
     const [searchQuery, setSearchQuery] = createSignal("");
     const [selectedTags, setSelectedTags] = createSignal<Tag[]>([]);
-    const [selectedCategories, setSelectedCategories] = createSignal<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = createSignal<Category | null>(null);
+    const [currentPage, setCurrentPage] = createSignal(1);
     const [isDropdownOpen, setIsDropdownOpen] = createSignal(false); 
     const [activeTagType, setActiveTagType] = createSignal<string | null>(null);  // tag_type
 
+    const [isMoreShow, setIsMoreShow] = createSignal<number>(0);
     const tagTypes = new Map<string, string>([
         ["f", "프레임워크"],
         ["l", "언어"],
@@ -43,8 +43,8 @@ const SearchPost = () => {
           setSelectedTags(prev => prev.includes(tag) ? prev.filter(selectedTag => selectedTag.id !== tag.id) : [...prev, tag]);
     };
     const toggleCategory = (category: Category) => { // 카테고리 선택 / 취소
-        setSelectedCategories(prev => 
-            prev.includes(category) ? prev.filter(selectedCategory => selectedCategory.id !== category.id) : [...prev, category]
+        setSelectedCategory(
+            category
         );
     };
     const selectedTagNames = (): string[]  => { // 선택된 태그 id에 맞춰춰 이름들 
@@ -54,14 +54,24 @@ const SearchPost = () => {
             .map(tag => tag.name);
     };
     const handleSearch = async () => {
-        const tags = selectedTagNames();
-        const categories = selectedCategories();
         const query = searchQuery();
-        const url = `${BASE_URL}/posts/search?query=${query}&category=${categories.join(",")}&tags=${tags.join(",")}`;
-        window.location.href = url;
-        await fetch(url)
+        // const url = `localhots:3000/search/post?page=${currentPage()}&query=${query}&category=${categories.join(",")}&tags=${tags.join(",")}`;
+        // window.location.href = url;  
+        await fetch(BASE_URL + `/search/post?page=${currentPage()}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                title: query,
+                tags: selectedTags().map(tag => tag.id),
+                category: selectedCategory()?.id,
+            }),
+            credentials: "include",
+        })
             .then(response => response.json())
             .then(data => {
+                setAllPosts(data.data);
                 console.log(data);
             })
             .catch(error => {
@@ -135,7 +145,7 @@ const SearchPost = () => {
                                         <button
                                             onClick={() => toggleCategory(category)}
                                             class={`px-3 py-1 rounded-full text-sm ${
-                                                selectedCategories().includes(category)
+                                                selectedCategory() === category
                                                     ? 'bg-primary_color_3 text-white'
                                                     : `bg-gray-200 text-gray-600 hover:bg-gray-100`
                                             }`}
@@ -149,21 +159,21 @@ const SearchPost = () => {
                     </Show>
                 </div>
 
-                <Show when={selectedCategories().length > 0}>
+                <Show when={selectedCategory() !== null}>
                     <div class="mb-6">
                         <h3 class="text-sm font-medium text-gray-500 mb-2">선택된 카테고리:</h3>
                         <div class="flex flex-wrap gap-2">
-                            {selectedCategories().map(category => (
+                            {selectedCategory() && (
                             <span class={`inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm`}>
-                                {category.name}
+                                {selectedCategory()?.name}
                                 <button 
-                                    onClick={() => toggleCategory(category)}
+                                    onClick={() => toggleCategory(selectedCategory()!)}
                                     class="ml-1.5 text-blue-500 hover:text-blue-700"
                                 >
                                     ×
                                 </button>
                             </span>
-                            ))}
+                            )}  
                         </div>
                     </div>
                 </Show>
@@ -185,13 +195,21 @@ const SearchPost = () => {
                         </div>
                     </div>
                 </Show>
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            
+            </div>
+            <For each={allPosts()} fallback={<p class="col-span-full text-center">게시물이 없습니다.</p>}>
+                {(post) => (
+                  <PostItem post={post} isMoreShow={isMoreShow} setIsMoreShow={setIsMoreShow} />
+                )}
+            </For>
+                <Show when={allPosts().length == 0}> <div class="bg-white rounded-lg shadow p-6">
                     <p class="text-gray-500 text-center">
                         {searchQuery() || selectedTags().length > 0 
                             ? `'${searchQuery()}' ${selectedTags().length > 0 ? `및 ${selectedTagNames().join(', ')} 태그` : ''}에 대한 검색 결과가 여기에 표시됩니다.`
                             : '검색어를 입력하거나 태그를 선택해 주세요.'}
                     </p>
-                </div>
+                </div></Show>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@ import { A } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import HoverPostItem from "./HoverPostItem";
-
+import { BASE_URL } from "~/stores/store";
 const PostItem = ({post, isMoreShow, setIsMoreShow}: {post: Post, isMoreShow: () => number, setIsMoreShow: (show: number) => void}) => {
     const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ const PostItem = ({post, isMoreShow, setIsMoreShow}: {post: Post, isMoreShow: ()
             <A href={`/post/${post.id}`} class="bg-white flex flex-col p-3 rounded-lg transition-all border border-gray-100 text-sm hover:border-primary_color_3/30">
                   <div class="flex-1 flex flex-col">
                     <div class="flex justify-between items-start gap-2 mb-2">
-                      <h3 class="font-semibold max-w-1/2 text-gray-900 line-clamp-1 text-md leading-tight">
+                      <h3 class="font-b max-w-1/2 text-gray-900 line-clamp-1 text-md leading-tight">
                         {post.title}
                       </h3>
                       <div class="flex flex-col items-end gap-1">
@@ -48,7 +48,7 @@ const PostItem = ({post, isMoreShow, setIsMoreShow}: {post: Post, isMoreShow: ()
                       <div class="flex items-center gap-1.5 mt-2 mb-1.5 overflow-hidden">
                         {post.author.profile_path && (
                           <img 
-                            src={post.author.profile_path} 
+                            src={`${BASE_URL}/public/${post.author.profile_path}`} 
                             alt={post.author.name}
                             class="w-5 h-5 rounded-full object-cover flex-shrink-0"
                           />

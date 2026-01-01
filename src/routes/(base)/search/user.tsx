@@ -44,8 +44,6 @@ const SearchPost = () => {
     const handleSearch = async () => {
         const tags = selectedTagNames();
         const query = searchQuery();
-        const url = `http://localhost:3000/search/user?query=${query}&tags=${tags.join(",")}`;
-        window.history.pushState({}, "", url);
         await fetch(BASE_URL + "/search/user" + `?page=${currentPage()}`, {
             method: "POST",
             headers: {
@@ -88,7 +86,7 @@ const SearchPost = () => {
                                     autoResize();
                                     setSearchQuery(e.currentTarget.value)
                                 }}
-                                placeholder="찾는 사람의 실력 / 성격을 입력하세요"
+                                placeholder="찾고 싶은 유형을 입력하세요"
                                 class="w-full resize-none transition-all overflow-y-auto max-h-48 px-4 py-3 border text-gray-800 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary_color_3 focus:border-transparent"
                                 ref={inputRef}
                             />

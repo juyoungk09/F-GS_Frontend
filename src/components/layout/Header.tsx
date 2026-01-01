@@ -1,10 +1,10 @@
-import { A, useLocation } from "@solidjs/router";
+import { A, useLocation, } from "@solidjs/router";
 import { Show } from "solid-js";
 import { BASE_URL, user } from "~/stores/store";
 export default function Header({hamberger, setHamberger}: {hamberger: () => boolean, setHamberger: (hamberger: boolean) => void}) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
-  
+  const isLoggedIn = true;
   return (
     <header class="bg-primary_color_4 truncate sticky top-0 flex justify-center shadow-md w-full z-100">
       <div class="w-screen">
@@ -35,11 +35,14 @@ export default function Header({hamberger, setHamberger}: {hamberger: () => bool
             <A href="/chat" class={`px-3 py-2 rounded-md text-sm font-medium ${isActive("/chat") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"} transition-colors`}>
               채팅 목록
             </A>
+            <A href="/notification" class={`px-3 py-2 rounded-md text-sm font-medium ${isActive("/notification") ? "bg-primary_color_3 text-white" : "text-gray-200 hover:bg-primary_color_3/50 hover:text-white"} transition-colors`}>
+              알림
+            </A>
           </nav>
 
           <div class="flex items-center space-x-2">
             <Show
-              when={user.id !== 0}
+              when={user.id}
               fallback={
                 <>
                   <A href="/user/login" class="px-4 py-2 text-sm rounded-md text-white bg-primary_color_3 hover:bg-primary_color_2 transition-colors">로그인</A>
@@ -49,7 +52,7 @@ export default function Header({hamberger, setHamberger}: {hamberger: () => bool
             >
               <div class="flex items-center space-x-4">
                 <span class="text-sm text-white">{user.name}님</span>
-                <A href={`/user/${user.id}`} class="p-1 rounded-full text-gray-200 hover:text-white focus:outline-none">
+                <A href={`/user/me`} class="p-1 rounded-full text-gray-200 hover:text-white focus:outline-none">
                   <span class="sr-only">프로필 메뉴</span>
                   <div class="h-8 w-8 rounded-full bg-primary_color_2 flex items-center justify-center text-white">
                     <img src={BASE_URL+"/public/"+user.profile_path} alt="profile" class="w-full h-full rounded-full" />
@@ -57,8 +60,6 @@ export default function Header({hamberger, setHamberger}: {hamberger: () => bool
                 </A>
               </div>
             </Show>
-            
-            
           </div>
         </div>
       </div>

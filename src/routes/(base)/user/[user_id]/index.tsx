@@ -1,43 +1,28 @@
 import axios from "axios";
 import logo from "/logo.svg"
 import { createResource, createSignal } from "solid-js";
-import { A, useNavigate } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { For, Show } from "solid-js";
 import { BASE_URL } from "~/stores/store";
-import { setUser } from "~/stores/store";
+import { user } from "~/stores/store";
 const Mypage = () => {  
+    const params = useParams();
     const navigate = useNavigate()
-    const [myTags] = createResource<Tag[]>(async () => {
-    const res = await axios.get(`${BASE_URL}/users/private/tags`, {
-        withCredentials: true
-    });
-    return res.data;
-    });
-    const [myData] = createResource<User>(async () => {
-        const res = await axios.get(`${BASE_URL}/users/private/me`,{withCredentials: true})
+    const [myTags, setMyTags] = createSignal<Tag[]>([]);
+    const [userData] = createResource<User>(async () => {
+        const res = await axios.get(`${BASE_URL}/users/i/${params.user_id}`,{withCredentials: true})
+        console.log("Error",res.data)
+        if(res.data === null){
+            navigate("/")
+        }
+        setMyTags(res.data.tags);
         return res.data
     })
-    const handleLogout = () => {
-        axios.post(`${BASE_URL}/users/logout`,{withCredentials: true})
-        .then((res) => {
-            console.log("로그아웃 성공!",res)
-            setUser(
-                {
-                id: 0,
-                name: "",
-                email: "",
-                profile_path: "",
-                }
-            )
-            navigate("/")
-        })
-        .catch((err) => console.log("에러",err))
-    }
     const handleDownload = async () => {
-        if(!myData()) return;
+        if(!userData()) return;
         try {
             const res = await axios.get(
-            `${BASE_URL}/public/${myData()?.portfolio_path}`,
+            `${BASE_URL}/public/${userData()?.portfolio_path}`,
             { responseType: "blob" }
             );
 
@@ -46,7 +31,7 @@ const Mypage = () => {
 
             const a = document.createElement("a");
             a.href = downloadUrl;
-            a.download = `${myData()?.name}의 포트폴리오`;
+            a.download = `${userData()?.name}의 포트폴리오`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -59,36 +44,37 @@ const Mypage = () => {
 
     return(
         <main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-            <Show when={myData()}>
+            <Show when={userData()}>
             <div class="max-w-7xl mx-auto ">
-                <div class="bg-white rounded-2xl border-2 border-gray-200 p-6 mb-8 flex justify-between items-center ">
+                <div class="bg-white rounded-2xl shadow-sm p-6 mb-8 flex justify-between items-center ">
                     <div>
-                        <h1 class="text-3xl font-bold text-primary_color_4">내 프로필</h1>
+                        <h1 class="text-3xl font-bold text-primary_color_4">프로필</h1>
                         <div class="text-yellow-400 whitespace-nowrap text-[12px]">
-                              {'★'.repeat(Math.floor(myData()?.rating ?? 0))}
-                              {'☆'.repeat(5 - Math.floor(myData()?.rating ?? 0))}
+                              {'★'.repeat(Math.floor(userData()?.rating ?? 0))}
+                              {'☆'.repeat(5 - Math.floor(userData()?.rating ?? 0))}
                             </div> 
                     </div>
                     <div class="flex gap-2">
-                        <A class="hover:underline text-primary_color_3 font-medium bg-gray-200 px-2 py-1 rounded-full" href={`/user/${myData()?.id}/posts`}>게시글</A>
+                        <A class="hover:underline text-primary_color_3 font-medium bg-amber-100 px-2 py-1 rounded-full" href={`/user/${userData()?.id}/reviews`}>리뷰</A>
+                        {user?.id !== userData()?.id && <A class="hover:underline text-primary_color_3 font-medium bg-amber-100 px-2 py-1 rounded-full" href={`/user/${userData()?.id}/posts`}>게시글</A>}
                     </div>
                 </div>
                 
                 <div class="flex flex-col lg:flex-row gap-8">
                 <div class="w-full lg:w-1/3">
-                    <div class="bg-white rounded-2xl border-2 border-gray-200 p-6 sticky top-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
                         <div class="flex flex-col items-center">
                             <div class="relative mb-6 group">
                                 <img 
-                                    class="w-40 h-40 rounded-full border-2 border-gray-200 object-cover" 
-                                    src={`${BASE_URL}/public/${myData()?.profile_path}`} 
-                                    alt={myData()?.name}
+                                    class="w-40 h-40 rounded-full border-4 border-dashed object-cover" 
+                                    src={`${BASE_URL}/public/${userData()?.profile_path}`} 
+                                    alt={userData()?.name}
                                 />
                             </div>
                             
-                            <h2 class="text-2xl font-bold text-gray-900">{myData()?.name}</h2>
+                            <h2 class="text-2xl font-bold text-gray-900">{userData()?.name}</h2>
                             <p class="text-gray-600 mb-4">
-                                {Math.floor((myData()?.student_id ?? 0) / 10000)}학년 {Math.floor(((myData()?.student_id ?? 0) / 100) % 10)}반 {Math.floor((myData()?.student_id ?? 0) % 100)}번
+                                {Math.floor((userData()?.student_id ?? 0) / 10000)}학년 {Math.floor(((userData()?.student_id ?? 0) / 100) % 10)}반 {Math.floor((userData()?.student_id ?? 0) % 100)}번
                             </p>
                             
                             <div class="flex flex-wrap justify-center gap-2 my-4">
@@ -104,33 +90,11 @@ const Mypage = () => {
                                     )}
                                 </For>
                             </div>
-
-                            <div class="w-full space-y-3 mt-6">
-                                <button 
-                                    onClick={() => navigate("./edit")}
-                                    class="w-full flex items-center justify-center gap-2 bg-primary_color_3 hover:bg-primary_color_2 text-white font-medium py-2.5 px-4 rounded-xl transition-colors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    프로필 수정
-                                </button>
-                                <button 
-                                    onClick={handleLogout}
-                                    class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-xl transition-colors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    로그아웃
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
-                <Show when={myData()?.portfolio_path !== ""} fallback={<p class="p-6 text-center text-gray-400">포트폴리오가 없습니다.</p>}>
                 <div class="flex-1 space-y-8">
-                    <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100">
                             <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary_color_3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -141,14 +105,14 @@ const Mypage = () => {
                         </div>
                         <div class="p-6">
                             <div class="whitespace-pre-line h-1/2 overflow-auto  max-w-none  text-gray-600">
-                                {myData()?.self_introduction || (
+                                {userData()?.self_introduction || (
                                     <p class="text-gray-400 italic">자기소개가 작성되지 않았습니다.</p>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl border-2 border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100">
                             <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary_color_3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,6 +121,7 @@ const Mypage = () => {
                                 포트폴리오
                             </h2>
                         </div>
+                        <Show when={userData()?.portfolio_path !== ""} fallback={<p class="p-6 text-center text-gray-400">포트폴리오가 없습니다.</p>}>
                         <div class="p-6">
                             <div class="group relative">
                                 <button 
@@ -167,7 +132,7 @@ const Mypage = () => {
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                         </svg>
-                                        <span class="text-lg font-semibold">{myData()?.name}의 포트폴리오</span>
+                                        <span class="text-lg font-semibold">{userData()?.name}의 포트폴리오</span>
                                     </div>
                                     <span class="text-sm opacity-80 group-hover:opacity-100 transition-opacity">
                                         클릭하여 다운로드
@@ -181,9 +146,9 @@ const Mypage = () => {
                                 </div>
                             </div>
                         </div>
+                        </Show>
                     </div>
                 </div>
-                </Show>
             </div>
             </div>
             </Show>

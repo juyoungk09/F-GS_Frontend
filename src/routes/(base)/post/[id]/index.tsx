@@ -1,179 +1,184 @@
-import { useParams, useNavigate } from "@solidjs/router";
-import { createSignal, onMount, Show, For } from "solid-js";
+import { useParams, useNavigate, A } from "@solidjs/router";
+import { createSignal, Show, For, createResource } from "solid-js";
+import { BASE_URL, user } from "~/stores/store";
+import axios from "axios";
 
-// 테스트용 더미 데이터 정의
-const dummyPosts = [
-  {
-    id: 1,
-    title: "Frontend Developer Recruitment",
-    category: "Development",
-    content:
-      "We are looking for a skilled frontend developer to build responsive web applications using SolidJS and Tailwind.",
-    created_at: "2025-07-31T09:00:00Z",
-    author: {
-      name: "KIM Mingi",
-      email: "hotcream0000@gmail.com",
-      created_at: "2025-07-30T10:15:00Z",
-      id: 101,
-      portfolio_path: "/portfolio/mingi",
-      profile_path: "/profile/mingi",
-      rating: 4.5,
-      self_introduction:
-        "Computer science student passionate about frontend development.",
-      student_id: 20250101,
-    },
-    current_recruits: 1,
-    max_recruits: 3,
-    recruiters: [
-      {
-        id: 201,
-        name: "KIM MIngi",
-        email: "hotcream0000@gmail.com",
-        created_at: "2025-07-31T09:30:00Z",
-        portfolio_path: "/portfolio/mingi",
-        profile_path: "/profile/mingi",
-        rating: 4.2,
-        self_introduction: "Full-stack engineer leading the recruiting team.",
-        student_id: 20250011,
-      },
-    ],
-    tags: [
-      { id: 1, name: "SolidJS", color: "#38BDF8", tag_type: "skill", usage: 12 },
-      { id: 2, name: "Tailwind", color: "#06B6D4", tag_type: "tool", usage: 8 },
-    ],
-    deadline: "2025-08-15T23:59:59Z",
-    is_finished: false,
-    updated_at: "2025-08-01T11:00:00Z",
-  },
-
-];
 
 const PostDetail = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = createSignal<any>(null);
-  const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal<Error | null>(null);
 
-
-  onMount(() => {
-    const id = parseInt(params.id, 10);
-    const found = dummyPosts.find((p) => p.id === id);
-    if (found) {
-      setPost(found);
-    } else {
-      setError(new Error("해당 게시글을 찾을 수 없습니다."));
-    }
-    setLoading(false);
-  });
-
+  
+  const [postDetail] = createResource<Post>(
+    async () => {
+      const r = await fetch(`${BASE_URL}/posts/${params.id}/detail`, { credentials: "include" });
+      console.log(r.status);
+      return r.json();
+    },
+  );
+  const [volunteers] = createResource<UserInform[]>(
+    async () => {
+      const r = await axios.get(`${BASE_URL}/posts/${params.id}/volunteers`, { withCredentials: true });
+      return r.data;
+    },
+  );
   return (
-    <div class="w-full">
-      <div class="h-auto flex flex-col">
-        <div class="flex-grow">
-          <div class="px-4 py-8">
-            {/* 로딩 상태 표시 */}
-            <Show when={loading()}>
-              <div class="flex items-center justify-center h-64">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2D336B]" />
-                <p class="ml-4 text-gray-500">로딩 중...</p>
-              </div>
-            </Show>
+    <div class="min-h-screen bg-gray-50 flex flex-col">
+      <main class="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+        <Show when={error()}>
+          <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500">
+            <p class="text-red-700">오류: {error()!.message}</p>
+          </div>
+        </Show>
 
-            <Show when={error()}>
-              <div class="text-center p-8">
-                <div class="text-red-500 mb-2">
-                  <svg
-                    class="w-12 h-12 mx-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+        <Show when={postDetail()}>
+          <article class="bg-white border-2 border-gray-100 rounded-lg overflow-hidden">
+            <div class="p-6 border-b-2 border-gray-100">
+              <div class="flex flex-col space-y-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                  {postDetail()!.title}
+                </h1>
+                <Show when={postDetail()?.author.id === user.id}>
+                  <div class="flex flex-col sm:flex-row gap-3">
+                    
+                    <button
+                      onClick={() => navigate(`/post/${params.id}/edit`)}
+                      class="px-4 py-2 bg-[#6B79C7] text-white rounded-md hover:bg-[#5f6db7] transition-colors"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <p class="text-[#2D336B]">오류: {error()!.message}</p>
-              </div>
-            </Show>
-
-            <Show when={post()}>
-              <article
-                class="
-                  bg-white
-                  rounded-xl
-                  shadow-lg
-                  p-6
-                  border border-gray-200
-                  h-100vh
-                  overflow-hidden
-                  whitespace-normal
-                  break-words
-                "
-              >
-                <div class="flex items-center justify-between mb-4">
-                  <h1 class="text-3xl font-bold text-[#2D336B]">
-                    {post()!.title}
-                  </h1>
-                  <button class="px-4 py-2 bg-[#2D336B] text-white rounded-lg hover:bg-[#7886C7] transition-colors"
-                    onClick={() => navigate(`/post/${params.id}/recruit`) as void}>
-                    지원폼 작성
+                    수정하기
                   </button>
                 </div>
-                <p class="text-sm text-gray-500 mb-2">
-                  카테고리:{" "}
-                  <span class="text-[#7886C7]">{post()!.category}</span> | 작성일:{" "}
-                  {new Date(post()!.created_at).toLocaleString()}
-                </p>
-                <div class="mb-6 leading-relaxed whitespace-pre-line">
-                  {post()!.content}
+              </Show>
+                  <button
+                    onClick={() => navigate(`/post/${params.id}/recruit`)}
+                    class="px-4 py-2 bg-[#6B79C7] text-white rounded-md hover:bg-[#5f6db7] transition-colors"
+                  >
+                    지원폼 작성
+                  </button>
+            </div>
+
+              <div class="mt-4 flex flex-wrap items-center text-sm text-gray-600 space-x-4">
+                <div class="flex items-center">
+                  <span class="font-medium text-gray-700">카테고리:</span>
+                  <span class="ml-1 text-primary-color-2">{postDetail()!.category || '없음'}</span>
                 </div>
-                <section class="mb-4">
-                  <h2 class="text-xl font-semibold mb-2 text-[#2D336B]">태그</h2>
-                  <div class="flex flex-wrap gap-2">
-                    <For each={post()!.tags}>
-                      {(tag) => (
-                        <span class="px-2 py-1 text-sm rounded bg-gray-200 text-gray-700">
-                          {tag.name}
-                        </span>
-                      )}
-                    </For>
-                  </div>
-                </section>
-                <section class="mb-4">
-                  <h2 class="text-xl font-semibold mb-2 text-[#2D336B]">
-                    모집 중인 참가자
-                  </h2>
-                  <ul class="list-disc list-inside space-y-1">
-                    <For each={post()!.recruiters}>
-                      {(recruiter) => (
-                        <li>
-                          {recruiter.name} (
-                          <span class="text-sm text-gray-600">
-                            {recruiter.email}
-                          </span>
-                          )
+                <span class="text-gray-300">|</span>
+                <div class="flex items-center">
+                  <span class="font-medium text-gray-700">작성일:</span>
+                  <span class="ml-1">
+                    {postDetail()!.created_at ? new Date(postDetail()!.created_at).toLocaleString() : "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6">
+              <div class="prose max-w-none text-gray-700 whitespace-pre-line">
+                {postDetail()!.content || '내용이 없습니다.'}
+              </div>
+
+              <section class="mt-8">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800 border-b-2 border-gray-100 pb-2">태그</h2>
+                <div class="flex flex-wrap gap-2">
+                  <For each={postDetail()!.tags ?? []}>
+                    {(tag: any) => (
+                      <span 
+                        class="px-3 py-1 text-sm rounded-full"
+                        style={{
+                          'background-color': tag.bg_color || '#f3f4f6',
+                          color: tag.font_color || '#374151',
+                          'border': `2px solid ${tag.bg_color ? `${tag.bg_color}80` : '#e5e7eb'}`
+                        }}
+                      >
+                        {tag.name}
+                      </span>
+                    )}
+                  </For>
+                  <Show when={(postDetail()?.tags ?? []).length === 0}>
+                    <span class="text-sm text-gray-400">등록된 태그가 없습니다.</span>
+                  </Show>
+                </div>
+              </section>
+
+              <section class="mt-8">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800 border-b-2 border-gray-100 pb-2">지원된 참가자</h2>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <ul class="space-y-3">
+                    <For each={postDetail()?.recruiters ?? []}>
+                      {(r: any) => (
+                        <li class="flex items-center p-2 hover:bg-gray-100 rounded transition-colors">
+                          <A 
+                            href={`/user/${r.id}`}
+                            class="flex-1 text-blue-400 hover:text-blue-600 transition-colors"
+                          ><img class="rounded-full border-1 border-gray-200 w-10 h-10 object-cover" src={BASE_URL + "/public/" + r.profile_path || '?'} alt="" />
+                            <span class="font-medium">{r.name}</span>
+                            <span class="ml-2 text-sm text-gray-500">{r.email}</span>
+                          </A>
                         </li>
                       )}
                     </For>
+                    <Show when={(postDetail()?.recruiters ?? []).length === 0}>
+                      <li class="text-center py-4 text-gray-400">
+                        아직 지원자가 없습니다.
+                      </li>
+                    </Show>
                   </ul>
-                </section>
-                <div class="flex justify-between items-center">
-                  <p class="text-gray-600">
-                    작성자:{" "}
-                    <span class="text-[#7886C7]">{post()!.author.name}</span> (
-                    {post()!.author.email})
-                  </p>
                 </div>
-              </article>
-            </Show>
-          </div>
-        </div>
-      </div>
+              </section>
+              <Show when={postDetail()?.author.id === user.id}>
+                    <div class="mt-8">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800 border-b-2 border-gray-100 pb-2">지원한 참가자</h2>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <ul class="space-y-3">
+                    <For each={volunteers() ?? []}>
+                      {(r: any) => (
+                        <li class="flex items-center p-2 hover:bg-gray-100 rounded transition-colors">
+                          <A 
+                            href={`/post/${params.id}/${r.id}`}
+                            class="flex-1 text-[#6B79C7] gap-2 hover:text-[#6B79C7] flex items-center transition-colors"
+                          > 
+                          <img class="rounded-full border-1 border-gray-200 w-10 h-10 object-cover" src={BASE_URL + "/public/" + r.profile_path || '?'} alt="" />
+                            <span class="font-medium text-[#6B79C7]">{r.name}</span>
+                            <span class="ml-2 text-sm text-gray-500">{r.email}</span>
+                          </A>
+                        </li>
+                      )}
+                    </For>
+                    <Show when={(volunteers() ?? []).length === 0}>
+                      <li class="text-center py-4 text-gray-400">
+                        아직 지원한 사람이 없습니다.
+                      </li>
+                    </Show>
+                  </ul>
+                  </div>
+                </div>
+              </Show>
+              <div class="mt-8 pt-6 border-t-2 border-gray-100">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                    <img class="rounded-full border-1 border-gray-200 w-10 h-10 object-cover" src={BASE_URL + "/public/" + postDetail()?.author?.profile_path || '?'} alt="" />
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm text-gray-700">
+                      작성자:{" "}
+                      <A 
+                        href={`/user/${postDetail()?.author.id}`}
+                        class="text-[#6B79C7] hover:underline"
+                      >
+                        {postDetail()?.author.name ?? "알 수 없음"}
+                      </A>
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {postDetail()?.author.email || ''}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </Show>
+      </main>
     </div>
   );
 };
