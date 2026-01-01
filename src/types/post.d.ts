@@ -1,0 +1,30 @@
+type Tag = {
+    id: number;
+    name: string;
+    bg_color: string;
+    font_color: string;
+    tag_type: string;
+    usage: number;
+};
+
+type Post = {
+    id: number;
+    apply : number;
+    attachments : string[];
+    title: string;
+    content: string;
+    category: string; 
+    created_at: string;
+    updated_at: string;
+    deadline: string;
+    is_finished: boolean;
+    max_recruits: number;
+    current_recruits: number;
+    author: UserInform;
+    tags: Tag[];
+    recruiters: UserInform[];
+};
+type Category = {
+    id: number;
+    name: string;
+};
